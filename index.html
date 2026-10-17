@@ -1,34 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campeonato | Placar</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Campeonato | Placar</title><link rel="stylesheet" href="style.css"><script defer src="script.js"></script>
 </head>
 <body>
-  <main class="container">
-    <h1>Campeonato de Brawl Stars</h1>
-    <p class="subtitle">Placar da partida</p>
-
-    <section class="placar" aria-label="Placar da partida">
-      <div class="equipe">
-        <h2 id="nome-a">Time A</h2>
-        <span class="pontos" id="pontos-a" aria-live="polite">0</span>
-      </div>
-      <span class="versus" aria-hidden="true">×</span>
-      <div class="equipe">
-        <h2 id="nome-b">Time B</h2>
-        <span class="pontos" id="pontos-b" aria-live="polite">0</span>
-      </div>
-    </section>
-
-    <section class="controles" aria-label="Controles do placar">
-      <button type="button" id="mais-a">+1 Time A</button>
-      <button type="button" id="mais-b">+1 Time B</button>
-      <button type="button" id="zerar">Zerar placar</button>
-    </section>
-  </main>
-</body>
-</html>
+<main>
+<header><span class="kicker">CAMPEONATO • AO VIVO</span><h1 id="titulo">Campeonato de Brawl Stars</h1><p>PLACAR DA PARTIDA</p></header>
+<section class="placar" aria-label="Placar">
+<article class="time"><div class="logo"><img id="logo-a" alt="Escudo do Time A" hidden><span id="iniciais-a">A</span></div><h2 id="nome-a">Time A</h2><strong id="pontos-a">0</strong></article>
+<div class="vs">VS</div>
+<article class="time"><div class="logo"><img id="logo-b" alt="Escudo do Time B" hidden><span id="iniciais-b">B</span></div><h2 id="nome-b">Time B</h2><strong id="pontos-b">0</strong></article>
+</section>
+<section class="admin" aria-label="Painel de controle"><div class="admin-header"><div><h3>Painel da organização</h3><p>Edite o placar e abra a projeção em outra aba.</p></div><a id="projetar" href="?modo=projecao" target="_blank" rel="noopener">Abrir projeção ↗</a></div>
+<label for="editar-titulo">Nome do campeonato</label><input type="text" id="editar-titulo" maxlength="80">
+<div class="forms"><fieldset><legend>Time A</legend><label for="editar-a">Nome do time</label><input id="editar-a" maxlength="40"><label for="arquivo-a">Escudo</label><input type="file" id="arquivo-a" accept="image/*"><button type="button" id="remover-a" class="subtle">Remover escudo</button><div class="acoes"><button id="menos-a">−1</button><button id="mais-a">+1</button></div></fieldset>
+<fieldset><legend>Time B</legend><label for="editar-b">Nome do time</label><input id="editar-b" maxlength="40"><label for="arquivo-b">Escudo</label><input type="file" id="arquivo-b" accept="image/*"><button type="button" id="remover-b" class="subtle">Remover escudo</button><div class="acoes"><button id="menos-b">−1</button><button id="mais-b">+1</button></div></fieldset></div>
+<div class="footer"><button id="zerar" class="reset">Zerar placar</button><p>Atalhos: <kbd>↑</kbd>/<kbd>↓</kbd> Time A; <kbd>→</kbd>/<kbd>←</kbd> Time B (fora dos campos de edição).</p></div><p id="mensagem" aria-live="polite"></p></section>
+</main>
+</body></html>
