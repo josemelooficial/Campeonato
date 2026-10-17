@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campeonato | Placar</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="container">
+    <h1>Campeonato de Brawl Stars</h1>
+    <p class="subtitle">Placar da partida</p>
+
+    <section class="placar" aria-label="Placar da partida">
+      <div class="equipe">
+        <h2 id="nome-a">Time A</h2>
+        <span class="pontos" id="pontos-a" aria-live="polite">0</span>
+      </div>
+      <span class="versus" aria-hidden="true">×</span>
+      <div class="equipe">
+        <h2 id="nome-b">Time B</h2>
+        <span class="pontos" id="pontos-b" aria-live="polite">0</span>
+      </div>
+    </section>
+
+    <section class="controles" aria-label="Controles do placar">
+      <button type="button" id="mais-a">+1 Time A</button>
+      <button type="button" id="mais-b">+1 Time B</button>
+      <button type="button" id="zerar">Zerar placar</button>
+    </section>
+  </main>
+</body>
+</html>
