@@ -44,7 +44,11 @@
           <h3>Painel da organização</h3>
           <p>Controle o placar pelo celular e acompanhe a atualização nos projetores.</p>
         </div>
-        <a href="?modo=projecao" target="_blank" rel="noopener">Abrir projeção ↗</a>
+        <div class="links-exibicao">
+          <a href="?modo=transmissao&equipe=a" target="_blank" rel="noopener">Transmitir Time A ↗</a>
+          <a href="?modo=transmissao&equipe=b" target="_blank" rel="noopener">Transmitir Time B ↗</a>
+          <a href="?modo=projecao" target="_blank" rel="noopener">Placar central ↗</a>
+        </div>
       </div>
 
       <div class="autenticacao">
@@ -90,5 +94,37 @@
       <p id="mensagem" aria-live="polite" role="status"></p>
     </section>
   </main>
+
+  <!-- Modo independente por computador: captura local do BlueStacks; o Firebase sincroniza apenas o placar. -->
+  <section id="palco-transmissao" class="palco-transmissao" data-layout="jogo-placar" hidden aria-label="Transmissão do campeonato">
+    <video id="video-jogo" autoplay muted playsinline aria-label="Janela do BlueStacks capturada"></video>
+    <div id="transmissao-sem-video" class="transmissao-sem-video">
+      <span class="transmissao-sem-video-icone" aria-hidden="true">▶</span>
+      <h2>Aguardando o BlueStacks</h2>
+      <p>Abra o emulador e clique em “Capturar BlueStacks”. Selecione a janela do emulador na janela do navegador.</p>
+    </div>
+    <div id="placar-na-tela" class="placar-na-tela" aria-label="Placar da transmissão">
+      <div class="transmissao-time">
+        <div class="transmissao-escudo"><img id="transmissao-logo-a" alt="Escudo A" hidden><span id="transmissao-iniciais-a">A</span></div>
+        <div class="transmissao-time-texto"><span id="transmissao-nome-a">Time A</span><strong id="transmissao-pontos-a">0</strong></div>
+      </div>
+      <div class="transmissao-centro"><span id="transmissao-titulo">Campeonato de Brawl Stars</span><b>VS</b></div>
+      <div class="transmissao-time">
+        <div class="transmissao-time-texto"><span id="transmissao-nome-b">Time B</span><strong id="transmissao-pontos-b">0</strong></div>
+        <div class="transmissao-escudo"><img id="transmissao-logo-b" alt="Escudo B" hidden><span id="transmissao-iniciais-b">B</span></div>
+      </div>
+    </div>
+    <div id="transmissao-controles" class="transmissao-controles">
+      <div class="transmissao-controles-botoes">
+        <button id="capturar-blue" type="button">Capturar BlueStacks</button>
+        <button id="parar-blue" class="subtle" type="button" hidden>Parar captura</button>
+        <button id="alternar-placar" class="subtle" type="button">E — Alternar</button>
+        <button id="somente-placar" class="subtle" type="button">T — Só placar</button>
+        <button id="tela-cheia" class="subtle" type="button">F — Tela cheia</button>
+      </div>
+      <p id="transmissao-status" role="status" aria-live="polite">Selecione a janela do BlueStacks para começar.</p>
+      <p class="transmissao-dica">Visão <span id="visao-identificada">A</span> • <kbd>E</kbd> alterna jogo / jogo com placar • <kbd>T</kbd> somente placar • <kbd>Esc</kbd> sai da tela cheia</p>
+    </div>
+  </section>
 </body>
 </html>

@@ -19,8 +19,17 @@ const PADRAO = {
   b: { nome: 'Time B', pontos: 0, logo: '' }
 };
 const $ = id => document.getElementById(id);
-const modoProjecao = new URLSearchParams(location.search).get('modo') === 'projecao';
+const parametros = new URLSearchParams(location.search);
+const modoProjecao = parametros.get('modo') === 'projecao';
+const modoTransmissao = parametros.get('modo') === 'transmissao';
+const modoSomenteLeitura = modoProjecao || modoTransmissao;
+const timeEspectador = parametros.get('equipe') === 'b' ? 'b' : 'a';
 if (modoProjecao) document.body.classList.add('projecao');
+if (modoTransmissao) {
+  document.body.classList.add('transmissao');
+  $('palco-transmissao').hidden = false;
+  $('visao-identificada').textContent = timeEspectador.toUpperCase();
+}
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -31,7 +40,7 @@ let autorizado = false;
 
 function mostrarErro(error) {
   console.error('Campeonato:', error);
-  if (!modoProjecao) $('mensagem').textContent = 'Não foi possível salvar. Confira a conexão e suas permissões no Firebase.';
+  if (!modoSomenteLeitura) $('mensagem').textContent = 'Não foi possível salvar. Confira a conexão e suas permissões no Firebase.';
 }
 
 function exibir() {
@@ -48,11 +57,24 @@ function exibir() {
     else img.removeAttribute('src');
     iniciais.textContent = (dados.nome.trim().charAt(0) || time).toUpperCase();
     img.alt = 'Escudo do ' + dados.nome;
+    if (modoTransmissao) {
+      const imgVideo = $('transmissao-logo-' + time);
+      const inicialVideo = $('transmissao-iniciais-' + time);
+      $('transmissao-nome-' + time).textContent = dados.nome;
+      $('transmissao-pontos-' + time).textContent = dados.pontos;
+      imgVideo.hidden = !dados.logo;
+      inicialVideo.hidden = Boolean(dados.logo);
+      if (dados.logo) imgVideo.src = dados.logo;
+      else imgVideo.removeAttribute('src');
+      inicialVideo.textContent = (dados.nome.trim().charAt(0) || time).toUpperCase();
+      imgVideo.alt = 'Escudo do ' + dados.nome;
+    }
   }
+  if (modoTransmissao) $('transmissao-titulo').textContent = estado.titulo || PADRAO.titulo;
 }
 
 function sincronizarInputs() {
-  if (modoProjecao) return;
+  if (modoSomenteLeitura) return;
   const titulo = $('editar-titulo');
   if (document.activeElement !== titulo) titulo.value = estado.titulo || PADRAO.titulo;
   for (const time of ['a', 'b']) {
@@ -84,7 +106,7 @@ function podeEditar(usuario) {
   return Boolean(usuario && usuario.emailVerified && usuario.email?.toLowerCase() === EMAIL_ADMIN);
 }
 
-if (!modoProjecao) {
+if (!modoSomenteLeitura) {
   const botaoEntrar = $('entrar-google');
   const botaoSair = $('sair-google');
   const provedor = new GoogleAuthProvider();
@@ -211,3 +233,99 @@ if (!modoProjecao) {
 }
 
 exibir();
+
+// A captura de vídeo nunca passa pelo Firebase: permanece somente no computador conectado ao projetor.
+if (modoTransmissao) {
+  const palco = $('palco-transmissao');
+  const video = $('video-jogo');
+  const semVideo = $('transmissao-sem-video');
+  const capturar = $('capturar-blue');
+  const parar = $('parar-blue');
+  const status = $('transmissao-status');
+  let fluxo = null;
+  let layout = 'jogo-placar';
+
+  function mudarLayout(novo) {
+    layout = novo;
+    palco.dataset.layout = novo;
+  }
+
+  function alternarLayout() {
+    mudarLayout(layout === 'jogo' ? 'jogo-placar' : 'jogo');
+  }
+
+  function encerrarCaptura() {
+    if (!fluxo) return;
+    const anterior = fluxo;
+    fluxo = null;
+    for (const faixa of anterior.getTracks()) faixa.stop();
+    video.pause();
+    video.srcObject = null;
+    semVideo.hidden = false;
+    capturar.hidden = false;
+    parar.hidden = true;
+    status.textContent = 'Captura encerrada. Clique em Capturar BlueStacks para reiniciar.';
+  }
+
+  capturar.addEventListener('click', async () => {
+    if (!navigator.mediaDevices?.getDisplayMedia) {
+      status.textContent = 'Este navegador não oferece captura de tela. Utilize Chrome ou Edge atualizado via HTTPS.';
+      return;
+    }
+    capturar.disabled = true;
+    status.textContent = 'Selecione a janela do BlueStacks na janela de compartilhamento...';
+    try {
+      // O navegador sempre exige uma escolha e uma autorização do usuário.
+      const novoFluxo = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false });
+      if (fluxo) encerrarCaptura();
+      fluxo = novoFluxo;
+      video.srcObject = fluxo;
+      semVideo.hidden = true;
+      capturar.hidden = true;
+      parar.hidden = false;
+      const faixa = fluxo.getVideoTracks()[0];
+      faixa.addEventListener('ended', () => { if (fluxo === novoFluxo) encerrarCaptura(); });
+      await video.play();
+      const superficie = faixa.getSettings().displaySurface;
+      status.textContent = superficie === 'monitor'
+        ? 'Capturando a tela inteira. Prefira compartilhar apenas a janela do BlueStacks.'
+        : superficie === 'browser'
+          ? 'Capturando uma aba. Prefira compartilhar a janela do BlueStacks.'
+          : 'Capturando janela. Aperte F para tela cheia; E e T mudam o modo de exibição.';
+    } catch (erro) {
+      console.error('Erro na captura da janela:', erro);
+      if (fluxo) encerrarCaptura();
+      status.textContent = erro.name === 'NotAllowedError'
+        ? 'Compartilhamento cancelado ou não permitido. Clique novamente para escolher a janela.'
+        : 'Não foi possível capturar a janela. Verifique as permissões e tente novamente.';
+    } finally {
+      capturar.disabled = false;
+    }
+  });
+
+  parar.addEventListener('click', encerrarCaptura);
+  $('alternar-placar').addEventListener('click', alternarLayout);
+  $('somente-placar').addEventListener('click', () => mudarLayout('placar'));
+
+  async function alternarTelaCheia() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch (erro) {
+      console.error('Falha ao alternar tela cheia:', erro);
+      status.textContent = 'Não foi possível ativar tela cheia. Tente F11 no navegador.';
+    }
+  }
+  $('tela-cheia').addEventListener('click', alternarTelaCheia);
+  document.addEventListener('fullscreenchange', () => {
+    document.body.classList.toggle('em-tela-cheia', Boolean(document.fullscreenElement));
+  });
+  document.addEventListener('keydown', evento => {
+    if (evento.altKey || evento.ctrlKey || evento.metaKey ||
+        /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
+    const tecla = evento.key.toLowerCase();
+    if (tecla === 'e') { evento.preventDefault(); alternarLayout(); }
+    if (tecla === 't') { evento.preventDefault(); mudarLayout('placar'); }
+    if (tecla === 'f') { evento.preventDefault(); alternarTelaCheia(); }
+  });
+}
