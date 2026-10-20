@@ -12,7 +12,7 @@ const firebaseConfig = {
   appId: '1:929625884391:web:9312c694202c8447768442'
 };
 
-const EMAIL_ADMIN = 'josemelo381530@gmail.com';
+const EMAILS_ADMIN = new Set(['josemelo381530@gmail.com', 'lucas.3603.14@gmail.com']);
 const PADRAO = {
   titulo: 'Campeonato de Brawl Stars',
   a: { nome: 'Time A', pontos: 0, logo: '' },
@@ -103,7 +103,7 @@ onValue(placarRef, snapshot => {
 });
 
 function podeEditar(usuario) {
-  return Boolean(usuario && usuario.emailVerified && usuario.email?.toLowerCase() === EMAIL_ADMIN);
+  return Boolean(usuario && usuario.emailVerified && EMAILS_ADMIN.has(usuario.email?.toLowerCase()));
 }
 
 if (!modoSomenteLeitura) {
